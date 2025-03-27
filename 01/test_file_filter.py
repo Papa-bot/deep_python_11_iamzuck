@@ -73,3 +73,59 @@ class TestFilterLines(unittest.TestCase):
             self.assertEqual(result, expected)
         finally:
             os.remove(tmp_path)
+
+    def test_match_multiple_filters_in_one_line(self):
+        search = ['ветер', 'гонит', 'луна', 'светит']
+        stop = ['луна', 'светит']
+        expected = ['ветер гонит листья по дороге']
+        self.file_obj.seek(0)
+        result = list(filter_lines(self.file_obj, search, stop))
+        self.assertEqual(expected, result)
+
+    def test_match_with_whole_line(self):
+        search = ['ветер гонит листья по дороге']
+        stop = ['луна светит над лесом']
+        expected = []
+        self.file_obj.seek(0)
+        result = list(filter_lines(self.file_obj, search, stop))
+        self.assertEqual(expected, result)
+
+    def test_exact_word_match(self):
+        data = 'роза\nлуна\nроза\nдорога\n'
+        search = ['роза']
+        stop = []
+        expected = ['роза', 'роза']
+        result = list(filter_lines(StringIO(data), search, stop))
+        self.assertEqual(expected, result)
+
+    def test_empty_filter(self):
+        search = ['']
+        stop = ['']
+        expected = []
+        self.file_obj.seek(0)
+        result = list(filter_lines(self.file_obj, search, stop))
+        self.assertEqual(expected, result)
+
+    def test_one_letter(self):
+        search = ['в']
+        stop = ['р']
+        expected = ['роза цветет в саду']
+        self.file_obj.seek(0)
+        result = list(filter_lines(self.file_obj, search, stop))
+        self.assertEqual(expected, result)
+
+    def test_numeric_and_mixed_words(self):
+        data = 'строка с цифрами 123\nстрока смешанная A1Б2В3\n'
+        search = ['A1Б2В3']
+        stop = ['123']
+        expected = ['строка смешанная A1Б2В3']
+        result = list(filter_lines(StringIO(data), search, stop))
+        self.assertEqual(expected, result)
+
+    def test_repeated(self):
+        data = 'роза\nроза\nроза\n'
+        search = ['роза']
+        stop = []
+        expected = ['роза', 'роза', 'роза']
+        result = list(filter_lines(StringIO(data), search, stop))
+        self.assertEqual(expected, result)

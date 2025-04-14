@@ -1,62 +1,64 @@
 from functools import wraps
 
 
+def _format_log_message(func, args, kwargs, attempt, result=None, exception=None):  # pylint: disable=too-many-arguments
+    message_parts = [f'\nrun "{func.__name__}"']
+
+    if args:
+        message_parts.append(f'with positional args = {args}')
+    if kwargs:
+        if args:
+            message_parts.append(f'keyword kwargs = {kwargs}')
+        else:
+            message_parts.append(f'with keyword kwargs = {kwargs}')
+
+    message_parts.append(f'attempt = {attempt}')
+
+    if exception is not None:
+        message_parts.append(f'exception = {type(exception).__name__}')
+    else:
+        message_parts.append(f'result = {result}')
+
+    return ' '.join(message_parts)
+
+
 def retry_deco(retries=1, expected_exceptions=None):
-    expected_exceptions = tuple(expected_exceptions or [])
+    if not isinstance(retries, int):
+        raise TypeError("retries must be an integer")
+
+    if retries < 0:
+        raise ValueError("retries cannot be negative")
+
+    expected_exceptions = tuple(expected_exceptions or ())
 
     def decorator(func):
         @wraps(func)
         def inner(*args, **kwargs):
-            attempt = 1
-            while attempt <= retries:
+            last_exception = None
+
+            for attempt in range(1, retries + 1):
                 try:
                     result = func(*args, **kwargs)
-                    if args and kwargs:
-                        print(
-                            f'\nrun \"{func.__name__}\" '
-                            f'with positional args = {args}, '
-                            f'keyword kwargs = {kwargs}, '
-                            f'attempt = {attempt}, result = {result}'
-                        )
-                    elif not args and kwargs:
-                        print(
-                            f'\nrun \"{func.__name__}\" '
-                            f'with keyword kwargs = {kwargs}, '
-                            f'attempt = {attempt}, result = {result}'
-                        )
-                    else:
-                        print(
-                            f'\nrun \"{func.__name__}\" '
-                            f'with positional args = {args}, '
-                            f'attempt = {attempt}, result = {result}'
-                        )
+                    print(_format_log_message(func, args, kwargs, attempt, result=result))
                     return result
+
+                except expected_exceptions as e:
+                    print(_format_log_message(func, args, kwargs, attempt, exception=e))
+                    last_exception = e
+                    continue
+
                 except Exception as e:  # pylint: disable=broad-exception-caught
-                    if args and kwargs:
-                        print(
-                            f'\nrun \"{func.__name__}\" '
-                            f'with positional args = {args}, '
-                            f'keyword kwargs = {kwargs}, '
-                            f'attempt = {attempt}, exception = {type(e).__name__}'
-                        )
-                    elif not args and kwargs:
-                        print(
-                            f'\nrun \"{func.__name__}\" '
-                            f'with keyword kwargs = {kwargs}, '
-                            f'attempt = {attempt}, exception = {type(e).__name__}'
-                        )
-                    else:
-                        print(
-                            f'\nrun \"{func.__name__}\" '
-                            f'with positional args = {args}, '
-                            f'attempt = {attempt}, exception = {type(e).__name__}'
-                        )
+                    print(_format_log_message(func, args, kwargs, attempt, exception=e))
+                    last_exception = e
 
-                    if isinstance(e, expected_exceptions):
-                        break
+            if retries == 0:
+                raise ValueError("Function not attempted (retries=0)")
 
-                    attempt += 1
+            if last_exception is not None:
+                raise last_exception
+
             return None
+
         return inner
     return decorator
 
@@ -82,9 +84,15 @@ if __name__ == '__main__':
     add(4, b=3)
     add(a=13, b=14)
 
-    check_str(value="123")
-    check_str(1)
-    check_str(value=None)
+    try:
+        check_str(value="123")
+        check_str(1)
+        check_str(value=None)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        print(f"Caught expected exception: {type(e).__name__}")
 
-    check_int(value=1)
-    check_int(value=None)
+    try:
+        check_int(value=1)
+        check_int(value=None)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        print(f"Caught expected exception: {type(e).__name__}")

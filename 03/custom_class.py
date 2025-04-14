@@ -35,7 +35,7 @@ class CustomList(list):
         raise TypeError("Unsupported type for comparison")
 
     def __ne__(self, other):
-        return not (self == other)
+        return not self == other
 
     def __lt__(self, other):
         if isinstance(other, CustomList):

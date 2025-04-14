@@ -31,7 +31,7 @@ class TestCustomList(unittest.TestCase):
         regular_list1 = [4, 5]
         regular_list2 = [1, 2, 3, 4]
         result1 = list1 + regular_list1
-        result2 =  list1 + regular_list2
+        result2 = list1 + regular_list2
         self.assertEqual(list(result1), [5, 7, 3])
         self.assertIsInstance(result1, CustomList)
         self.assertEqual(list(result2), [2, 4, 6, 4])
@@ -121,7 +121,7 @@ class TestCustomList(unittest.TestCase):
         regular_list1 = [4, 5]
         regular_list2 = [2, 3, 4, 5]
         result1 = list1 - regular_list1
-        result2 =  list1 - regular_list2
+        result2 = list1 - regular_list2
         self.assertEqual(list(result1), [-3, -3, 3])
         self.assertIsInstance(result1, CustomList)
         self.assertEqual(list(result2), [-1, -1, -1, -5])

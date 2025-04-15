@@ -48,7 +48,7 @@ class TestCustomMeta(unittest.TestCase):
         inst = CustomClass()
         inst.dynamic = "added later"
         inst._dynamic_protected = "protected added"
-        inst._class__dynamic_private = "private added"  # Явное задание приватного атрибута
+        inst._class__dynamic_private = "private added"
 
         self.assertEqual(inst.custom_dynamic, "added later")
         self.assertEqual(inst.custom__dynamic_protected, "protected added")

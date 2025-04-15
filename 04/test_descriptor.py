@@ -90,28 +90,22 @@ class TestDataClass(unittest.TestCase):
         self.assertEqual(data.price, 100)
 
     def test_data_invalid_num_type(self):
-        """Проверяем, что при неверном типе num вылетит TypeError."""
         with self.assertRaises(TypeError):
             Data(num="not an int", name="Python", price=100)
 
     def test_data_invalid_name_type(self):
-        """Проверяем, что при неверном типе name вылетит TypeError."""
         with self.assertRaises(TypeError):
             Data(num=10, name=999, price=100)
 
     def test_data_invalid_price_negative(self):
-        """Проверяем, что при отрицательном значении price вылетит ValueError."""
         with self.assertRaises(ValueError):
             Data(num=10, name="Python", price=-50)
 
     def test_data_invalid_price_zero(self):
-        """Проверяем, что при значении price = 0 вылетит ValueError."""
         with self.assertRaises(ValueError):
             Data(num=10, name="Python", price=0)
 
     def test_setters_after_init(self):
-        """Проверяем, что можно корректно переустанавливать значения
-           в объекте Data и срабатывают все проверки."""
         data = Data(num=1, name="Test", price=10)
 
         data.num = 20

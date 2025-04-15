@@ -44,8 +44,7 @@ def retry_deco(retries=1, expected_exceptions=None):
 
                 except expected_exceptions as e:
                     print(_format_log_message(func, args, kwargs, attempt, exception=e))
-                    last_exception = e
-                    continue
+                    raise e
 
                 except Exception as e:  # pylint: disable=broad-exception-caught
                     print(_format_log_message(func, args, kwargs, attempt, exception=e))
